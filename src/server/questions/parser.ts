@@ -3,26 +3,15 @@ import { z } from 'zod'
 
 const answerIds = ['A', 'B', 'C', 'D'] as const
 
-const optionSchema = z.object({
-  id: z.enum(answerIds),
-  text: z.string().trim().min(1, 'Answer option cannot be empty'),
-})
-
 const questionSchema = z.object({
   id: z.string().uuid(),
   sourceNumber: z.number().int().positive(),
-  question: z.string().trim().min(1, 'Question cannot be empty'),
-  options: z.array(optionSchema).length(4),
+  question: z.string().trim().min(1),
+  options: z.array(z.object({
+    id: z.enum(answerIds),
+    text: z.string().trim().min(1),
+  })).length(4),
   correctAnswerId: z.enum(answerIds),
-}).superRefine((question, context) => {
-  const ids = question.options.map(option => option.id)
-
-  if (new Set(ids).size !== 4) {
-    context.addIssue({
-      code: 'custom',
-      message: 'Options must contain A, B, C and D exactly once',
-    })
-  }
 })
 
 export type ParsedQuestion = z.infer<typeof questionSchema>
@@ -44,7 +33,7 @@ interface QuestionBlock {
   lines: string[]
 }
 
-function normalizeQuestion(value: string): string {
+function normalizeQuestion(value: string) {
   return value.trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
@@ -52,13 +41,12 @@ export function parseQuestionText(input: string): ParseResult {
   const questions: ParsedQuestion[] = []
   const errors: ImportError[] = []
   const seenQuestions = new Set<string>()
+  const seenNumbers = new Set<number>()
 
   const lines = input.replace(/\r\n?/g, '\n').split('\n')
   const blocks: QuestionBlock[] = []
-
   let currentBlock: QuestionBlock | null = null
 
-  // Separate the TXT file into question blocks.
   lines.forEach((line, index) => {
     const trimmed = line.trim()
 
@@ -71,24 +59,30 @@ export function parseQuestionText(input: string): ParseResult {
     }
 
     if (!currentBlock) {
-      currentBlock = {
-        startLine: index + 1,
-        lines: [],
-      }
+      currentBlock = { startLine: index + 1, lines: [] }
     }
 
     currentBlock.lines.push(trimmed)
   })
 
-  if (currentBlock) {
-    blocks.push(currentBlock)
-  }
+  if (currentBlock) blocks.push(currentBlock)
 
   if (blocks.length === 0) {
+    errors.push({ line: 1, message: 'The TXT file contains no questions.' })
+  }
+
+  if (blocks.length > 500) {
     errors.push({
       line: 1,
-      message: 'The TXT file contains no questions.',
+      message: `Maximum 500 questions allowed per battle. Found ${blocks.length}.`,
     })
+
+    return {
+      totalBlocks: blocks.length,
+      questions: [],
+      errors,
+      success: false,
+    }
   }
 
   for (const block of blocks) {
@@ -97,7 +91,7 @@ export function parseQuestionText(input: string): ParseResult {
     if (blockLines.length !== 6) {
       errors.push({
         line: startLine,
-        message: 'Each question must contain exactly 6 lines: question, four options and answer.',
+        message: 'Each question must contain exactly 6 lines: question, options A-D and correct answer. No explanations or extra lines.',
       })
       continue
     }
@@ -107,7 +101,7 @@ export function parseQuestionText(input: string): ParseResult {
     if (!questionMatch) {
       errors.push({
         line: startLine,
-        message: 'Question must start with a number followed by a period.',
+        message: 'Question must start with a number, period and question text. Example: 1. What is ...?',
       })
       continue
     }
@@ -115,32 +109,34 @@ export function parseQuestionText(input: string): ParseResult {
     const sourceNumber = Number(questionMatch[1])
     const questionText = questionMatch[2].trim()
 
-    const options = []
+    if (!Number.isSafeInteger(sourceNumber) || sourceNumber < 1) {
+      errors.push({ line: startLine, message: 'Question number must be a positive integer.' })
+      continue
+    }
+
+    if (seenNumbers.has(sourceNumber)) {
+      errors.push({ line: startLine, message: `Question number ${sourceNumber} is repeated.` })
+      continue
+    }
+
+    const options: ParsedQuestion['options'] = []
     let invalidOption = false
 
     for (let index = 0; index < 4; index++) {
+      const expected = answerIds[index]
       const optionMatch = blockLines[index + 1].match(/^([A-D])\.\s*(.*)$/)
 
-      if (!optionMatch) {
+      if (!optionMatch || optionMatch[1] !== expected || !optionMatch[2].trim()) {
         errors.push({
           line: startLine + index + 1,
-          message: `Expected option ${answerIds[index]}.`,
-        })
-        invalidOption = true
-        break
-      }
-
-      if (optionMatch[1] !== answerIds[index]) {
-        errors.push({
-          line: startLine + index + 1,
-          message: `Options must appear in A, B, C, D order. Expected ${answerIds[index]}.`,
+          message: `Expected a non-empty option ${expected}. Example: ${expected}. Your answer`,
         })
         invalidOption = true
         break
       }
 
       options.push({
-        id: answerIds[index],
+        id: expected,
         text: optionMatch[2].trim(),
       })
     }
@@ -152,7 +148,7 @@ export function parseQuestionText(input: string): ParseResult {
     if (!answerMatch) {
       errors.push({
         line: startLine + 5,
-        message: 'Correct answer must use Answer: A, B, C or D.',
+        message: 'Correct answer must be exactly Answer: A, Answer: B, Answer: C or Answer: D.',
       })
       continue
     }
@@ -180,13 +176,12 @@ export function parseQuestionText(input: string): ParseResult {
     if (!validation.success) {
       errors.push({
         line: startLine,
-        message: validation.error.issues
-          .map(issue => issue.message)
-          .join('; '),
+        message: validation.error.issues.map(issue => issue.message).join('; '),
       })
       continue
     }
 
+    seenNumbers.add(sourceNumber)
     seenQuestions.add(duplicateKey)
     questions.push(validation.data)
   }

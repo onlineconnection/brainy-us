@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './Admin.css'
 import OfflineContent from './components/OfflineContent'
+import BattleManagement from './components/BattleManagement'
 
 const navigation = [
   { section: 'MAIN MENU', items: [
@@ -21,6 +22,56 @@ const navigation = [
 
 function AdminApp() {
   const [activePage, setActivePage] = useState('Overview')
+  const [onlinePlayers, setOnlinePlayers] = useState<number | null>(null)
+  const [presenceStatus, setPresenceStatus] = useState<'connecting' | 'live' | 'offline'>('connecting')
+
+  useEffect(() => {
+    let socket: WebSocket | null = null
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+    let stopped = false
+
+    function connect() {
+      if (stopped) return
+
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      socket = new WebSocket(`${protocol}//${window.location.host}`)
+
+      socket.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data)
+
+          if (
+            message.type === 'ONLINE_STATS' &&
+            typeof message.onlinePlayers === 'number'
+          ) {
+            setOnlinePlayers(message.onlinePlayers)
+            setPresenceStatus('live')
+          }
+        } catch {
+          // Ignore messages that are not valid JSON.
+        }
+      }
+
+      socket.onclose = () => {
+        if (stopped) return
+
+        setPresenceStatus('offline')
+        reconnectTimer = setTimeout(connect, 3000)
+      }
+
+      socket.onerror = () => {
+        socket?.close()
+      }
+    }
+
+    connect()
+
+    return () => {
+      stopped = true
+      if (reconnectTimer) clearTimeout(reconnectTimer)
+      socket?.close()
+    }
+  }, [])
 
   return (
     <div className="admin-layout">
@@ -91,7 +142,9 @@ function AdminApp() {
         </header>
 
         <div className="admin-content">
-          {activePage === 'Offline Content' ? (
+          {activePage === 'Battles' ? (
+            <BattleManagement />
+          ) : activePage === 'Offline Content' ? (
             <OfflineContent />
           ) : activePage === 'Overview' ? (
             <>
@@ -126,7 +179,16 @@ function AdminApp() {
 
               <section className="admin-stats">
                 {[
-                  { label: 'TOTAL PLAYERS', value: '—', icon: '♙', note: 'Awaiting player data' },
+                  {
+                    label: 'ONLINE PLAYERS',
+                    value: onlinePlayers === null ? '—' : String(onlinePlayers),
+                    icon: '♙',
+                    note: presenceStatus === 'live'
+                      ? 'Authenticated players connected now'
+                      : presenceStatus === 'connecting'
+                        ? 'Connecting to live presence...'
+                        : 'Live connection unavailable',
+                  },
                   { label: 'ACTIVE BATTLES', value: '—', icon: '⚔', note: 'Live competitions' },
                   { label: 'QUESTION PACKS', value: '—', icon: '▣', note: 'Published content' },
                   { label: 'PENDING APPROVALS', value: '—', icon: '◷', note: 'Registration reviews' },

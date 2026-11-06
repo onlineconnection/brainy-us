@@ -1,0 +1,5 @@
+{
+  "appId": "com.brainyus.app",
+  "appName": "Brainy US",
+  "webDir": "dist/client"
+}
