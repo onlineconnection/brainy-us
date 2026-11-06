@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "questions:generate": "tsx src/server/questions/generate.ts"
+    "questions:generate": "tsx src/server/questions/generate.ts",
+    "start": "tsx src/server/index.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.0",
@@ -19,6 +20,8 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tailwindcss": "^4.3.4",
+    "tsx": "^4.23.15",
+    "vite": "^8.3.6",
     "ws": "^8.22.1",
     "zod": "^4.6.7"
   },
@@ -31,8 +34,9 @@
     "@types/ws": "^8.18.2",
     "@vitejs/plugin-react": "^6.1.2",
     "oxlint": "^1.90.0",
-    "tsx": "^4.23.15",
-    "typescript": "~7.0.2",
-    "vite": "^8.3.6"
+    "typescript": "~7.0.2"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }
