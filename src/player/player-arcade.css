@@ -1,0 +1,430 @@
+/* BRAINY US — PLAYER ARCADE THEME
+   All selectors are scoped to .app-shell.
+   Admin dashboard styles remain untouched.
+*/
+
+.app-shell {
+  --arcade-bg: #080812;
+  --arcade-panel: #111124;
+  --arcade-purple: #a78bfa;
+  --arcade-cyan: #67e8f9;
+  --arcade-muted: #a5a2bd;
+  background:
+    radial-gradient(ellipse at 12% 8%, #5525a52b, transparent 34%),
+    radial-gradient(ellipse at 88% 35%, #087d9b1c, transparent 36%),
+    var(--arcade-bg);
+}
+
+.app-shell .app-frame {
+  max-width: 1180px;
+}
+
+.app-shell .app-header {
+  border-bottom: 1px solid #ffffff0d;
+}
+
+.app-shell .brand-mark {
+  background: linear-gradient(145deg, #b69aff, #7045dc);
+  box-shadow: 0 0 25px #9865ff55;
+}
+
+.app-shell .brand-name {
+  letter-spacing: 1.5px;
+}
+
+.app-shell .connection-status {
+  border: 1px solid #43e6a52b;
+  border-radius: 30px;
+  padding: 8px 12px;
+  background: #43e6a510;
+}
+
+.app-shell .screen-content {
+  min-height: 650px;
+}
+
+.app-shell .home-screen {
+  max-width: 1000px;
+  padding-top: 62px;
+  padding-bottom: 50px;
+}
+
+.app-shell .home-intro {
+  margin-bottom: 42px;
+}
+
+.app-shell .welcome-label {
+  color: var(--arcade-cyan);
+  font-size: 10px;
+  letter-spacing: 2.4px;
+}
+
+.app-shell .welcome-line {
+  background: var(--arcade-cyan);
+  box-shadow: 0 0 15px var(--arcade-cyan);
+}
+
+.app-shell .home-intro h1 {
+  margin-top: 22px;
+  font-size: clamp(46px, 7vw, 76px);
+  line-height: .99;
+  letter-spacing: -4px;
+  font-weight: 950;
+}
+
+.app-shell .home-intro h1 span {
+  background: linear-gradient(95deg, #c4aaff 5%, #8e75ff 48%, #67e8f9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+}
+
+.app-shell .home-intro p {
+  margin-top: 17px;
+  color: #aaa7c2;
+  font-size: 15px;
+}
+
+.app-shell .mode-selection {
+  gap: 22px;
+}
+
+.app-shell .game-mode-card {
+  min-height: 445px;
+  padding: 27px;
+  border-radius: 25px;
+  border-width: 1px;
+  transition:
+    transform .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease;
+  isolation: isolate;
+}
+
+.app-shell .game-mode-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: .7;
+  pointer-events: none;
+  background: linear-gradient(135deg, #ffffff0c, transparent 42%);
+}
+
+.app-shell .game-mode-card::after {
+  content: "";
+  position: absolute;
+  width: 230px;
+  height: 230px;
+  right: -90px;
+  top: -100px;
+  border-radius: 50%;
+  filter: blur(65px);
+  opacity: .25;
+  pointer-events: none;
+}
+
+.app-shell .online-card {
+  border-color: #986bff55;
+  background:
+    radial-gradient(ellipse at 80% 28%, #8b5cf633, transparent 48%),
+    linear-gradient(145deg, #21163b, #100f20 72%);
+  box-shadow: inset 0 1px #ffffff13, 0 15px 45px #00000035;
+}
+
+.app-shell .online-card::after {
+  background: #9a6bff;
+}
+
+.app-shell .offline-card {
+  border-color: #35c9d34d;
+  background:
+    radial-gradient(ellipse at 80% 28%, #20c8d52b, transparent 48%),
+    linear-gradient(145deg, #102d37, #0d1722 72%);
+  box-shadow: inset 0 1px #ffffff13, 0 15px 45px #00000035;
+}
+
+.app-shell .offline-card::after {
+  background: #35d7e5;
+}
+
+.app-shell .game-mode-card:hover {
+  transform: translateY(-7px);
+}
+
+.app-shell .online-card:hover {
+  border-color: #b49aff;
+  box-shadow: 0 20px 55px #8c5bff25, inset 0 1px #ffffff20;
+}
+
+.app-shell .offline-card:hover {
+  border-color: #6cebf2;
+  box-shadow: 0 20px 55px #27d5e525, inset 0 1px #ffffff20;
+}
+
+.app-shell .mode-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  font-size: 25px;
+}
+
+.app-shell .mode-badge {
+  padding: 8px 11px;
+  border-radius: 30px;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.app-shell .mode-card-art {
+  min-height: 175px;
+}
+
+.app-shell .art-core {
+  box-shadow: 0 0 45px #a27aff55, inset 0 0 22px #ffffff20;
+  animation: arcade-float 4s ease-in-out infinite;
+}
+
+.app-shell .offline-symbol {
+  box-shadow: 0 0 40px #35d7e533, inset 0 0 20px #ffffff15;
+  animation: arcade-float 4.5s ease-in-out infinite;
+}
+
+.app-shell .mode-card-copy h2 {
+  font-size: 29px;
+  letter-spacing: -1px;
+}
+
+.app-shell .mode-card-copy p {
+  max-width: 340px;
+  color: #b8b4cc;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.app-shell .mode-card-action {
+  margin-top: 22px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.app-shell .mode-arrow {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.app-shell .home-footnote {
+  margin-top: 27px;
+  color: #88849e;
+}
+
+.app-shell .bottom-nav {
+  border: 1px solid #ffffff18;
+  background: #11101deF;
+  box-shadow: 0 12px 45px #00000070;
+  backdrop-filter: blur(22px);
+}
+
+.app-shell .bottom-nav-item.selected {
+  color: #c7b3ff;
+}
+
+.app-shell .bottom-nav-item.selected .bottom-nav-icon {
+  filter: drop-shadow(0 0 8px #a78bfa);
+}
+
+@keyframes arcade-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+
+@media (max-width: 650px) {
+  .app-shell .home-screen {
+    padding-top: 39px;
+    padding-bottom: 35px;
+  }
+
+  .app-shell .home-intro {
+    margin-bottom: 29px;
+  }
+
+  .app-shell .home-intro h1 {
+    font-size: clamp(43px, 11vw, 60px);
+    letter-spacing: -2.8px;
+  }
+
+  .app-shell .home-intro p {
+    max-width: 290px;
+    font-size: 13px;
+  }
+
+  .app-shell .mode-selection {
+    gap: 16px;
+  }
+
+  .app-shell .game-mode-card {
+    min-height: 390px;
+    padding: 21px;
+    border-radius: 22px;
+  }
+
+  .app-shell .mode-card-art {
+    min-height: 145px;
+  }
+
+  .app-shell .mode-card-copy h2 {
+    font-size: 26px;
+  }
+
+  .app-shell .bottom-nav {
+    border-radius: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell .art-core,
+  .app-shell .offline-symbol {
+    animation: none;
+  }
+
+  .app-shell .game-mode-card {
+    transition: none;
+  }
+}
+
+
+/* STABILITY AND MOBILE ARCADE POLISH */
+.app-shell {
+  background: #080812 !important;
+}
+
+.app-shell .game-mode-card::after {
+  display: none !important;
+  filter: none !important;
+}
+
+.app-shell .game-mode-card::before {
+  opacity: .35;
+}
+
+.app-shell .art-core,
+.app-shell .offline-symbol {
+  animation: none !important;
+  filter: none !important;
+  box-shadow: inset 0 1px 12px #ffffff12;
+}
+
+.app-shell .welcome-line {
+  box-shadow: none !important;
+}
+
+.app-shell .bottom-nav {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #11101d !important;
+  box-shadow: 0 8px 24px #00000040 !important;
+}
+
+.app-shell .bottom-nav-item.selected .bottom-nav-icon {
+  filter: none !important;
+}
+
+.app-shell .game-mode-card {
+  min-height: 430px;
+  border-radius: 24px;
+  transition: transform .18s ease, border-color .18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-shell .game-mode-card:active {
+  transform: scale(.985);
+}
+
+.app-shell .mode-card-action {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: #ffffff0d;
+  padding: 0 16px;
+}
+
+.app-shell .mode-arrow {
+  display: none !important;
+}
+
+.app-shell .signout-button,
+.app-shell .back-home {
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 13px;
+  transition: background .18s ease, transform .18s ease;
+}
+
+.app-shell .signout-button:active,
+.app-shell .back-home:active,
+.app-shell .bottom-nav-item:active {
+  transform: scale(.97);
+}
+
+.app-shell .mode-icon {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.app-shell .offline-symbol {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.app-shell .bottom-nav-icon {
+  filter: none !important;
+}
+
+.app-shell .rank-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  min-height: 42px;
+  border-radius: 12px;
+  background: #a78bfa18;
+  color: #c7b3ff;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 650px) {
+  .app-shell .game-mode-card {
+    min-height: 370px;
+    padding: 20px;
+  }
+
+  .app-shell .mode-card-action {
+    min-height: 56px;
+    font-size: 11px;
+  }
+
+  .app-shell .bottom-nav {
+    border-radius: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell *,
+  .app-shell *::before,
+  .app-shell *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

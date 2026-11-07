@@ -1,3 +1,4 @@
+import './player/player-arcade.css'
 import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
@@ -152,7 +153,7 @@ function App() {
               aria-label="Sign out"
               title="Sign out"
             >
-              {signingOut ? '…' : '↗'}
+              {signingOut ? '…' : 'EXIT'}
             </button>
           </div>
         </header>
@@ -175,15 +176,13 @@ function App() {
                   onClick={() => setActiveScreen('Online')}
                 >
                   <div className="mode-card-top">
-                    <span className="mode-icon online-icon">⌁</span>
+                    <span className="mode-icon online-icon">01</span>
                     <span className="mode-badge live-badge"><i /> LIVE ARENA</span>
                   </div>
                   <div className="mode-card-art online-art">
                     <div className="art-ring ring-one" />
                     <div className="art-ring ring-two" />
-                    <div className="art-core">B<span>!</span></div>
-                    <span className="art-spark spark-one">✦</span>
-                    <span className="art-spark spark-two">✧</span>
+                    <div className="art-core">B</div>
                   </div>
                   <div className="mode-card-copy">
                     <span className="mode-kicker">COMPETE WORLDWIDE</span>
@@ -192,7 +191,6 @@ function App() {
                   </div>
                   <div className="mode-card-action">
                     <span>ENTER ONLINE ARENA</span>
-                    <span className="mode-arrow">↗</span>
                   </div>
                 </button>
 
@@ -201,13 +199,13 @@ function App() {
                   onClick={() => setActiveScreen('Offline')}
                 >
                   <div className="mode-card-top">
-                    <span className="mode-icon offline-icon">⌘</span>
+                    <span className="mode-icon offline-icon">02</span>
                     <span className="mode-badge local-badge">LOCAL PLAY</span>
                   </div>
                   <div className="mode-card-art offline-art">
                     <div className="offline-orbit orbit-one" />
                     <div className="offline-orbit orbit-two" />
-                    <div className="offline-symbol">⚡</div>
+                    <div className="offline-symbol">LOCAL</div>
                     <span className="offline-player player-one">●</span>
                     <span className="offline-player player-two">●</span>
                     <span className="offline-player player-three">●</span>
@@ -219,13 +217,11 @@ function App() {
                   </div>
                   <div className="mode-card-action">
                     <span>EXPLORE OFFLINE PLAY</span>
-                    <span className="mode-arrow">↗</span>
                   </div>
                 </button>
               </div>
 
               <div className="home-footnote">
-                <span>✦</span>
                 ONE PLATFORM. TWO WAYS TO BATTLE.
               </div>
             </section>
@@ -234,7 +230,7 @@ function App() {
           {activeScreen === 'Online' && (
             <section className="destination-screen">
               <button className="back-home" onClick={() => setActiveScreen('Home')}>
-                ← <span>BACK TO HOME</span>
+                <span>BACK TO HOME</span>
               </button>
               <BattleArena />
             </section>
@@ -243,7 +239,7 @@ function App() {
           {activeScreen === 'Offline' && (
             <section className="offline-screen">
               <button className="back-home" onClick={() => setActiveScreen('Home')}>
-                ← <span>BACK TO HOME</span>
+                <span>BACK TO HOME</span>
               </button>
               <div className="offline-heading">
                 <span className="welcome-label"><span className="welcome-line" /> LOCAL MULTIPLAYER</span>
@@ -251,7 +247,7 @@ function App() {
                 <p>Play together on the same local network or nearby devices.</p>
               </div>
               <div className="offline-coming-card">
-                <div className="offline-coming-icon">⚡</div>
+                <div className="offline-coming-icon">LOCAL</div>
                 <span className="mode-kicker">LOCAL BATTLE MODE</span>
                 <h2>Offline multiplayer is next.</h2>
                 <p>We're building room creation, room joining and local match synchronization. This section will become playable when that system is implemented.</p>
@@ -266,7 +262,7 @@ function App() {
               <h1>Leaderboard</h1>
               <p>See who's rising through the Brainy US ranks.</p>
               <div className="simple-empty-card">
-                <span>🏆</span>
+                <span className="rank-mark">RANK</span>
                 <h2>The rankings are coming.</h2>
                 <p>Player rankings will appear here as match results are recorded.</p>
               </div>
@@ -283,28 +279,28 @@ function App() {
             className={`bottom-nav-item ${activeScreen === 'Home' ? 'selected' : ''}`}
             onClick={() => setActiveScreen('Home')}
           >
-            <span className="bottom-nav-icon">⌂</span>
+            <span className="bottom-nav-icon">H</span>
             <span>Home</span>
           </button>
           <button
             className={`bottom-nav-item ${activeScreen === 'Online' || activeScreen === 'Offline' ? 'selected' : ''}`}
             onClick={() => setActiveScreen('Online')}
           >
-            <span className="bottom-nav-icon">⚔</span>
+            <span className="bottom-nav-icon">B</span>
             <span>Battles</span>
           </button>
           <button
             className={`bottom-nav-item ${activeScreen === 'Leaderboard' ? 'selected' : ''}`}
             onClick={() => setActiveScreen('Leaderboard')}
           >
-            <span className="bottom-nav-icon">♛</span>
+            <span className="bottom-nav-icon">R</span>
             <span>Ranks</span>
           </button>
           <button
             className={`bottom-nav-item ${activeScreen === 'Profile' ? 'selected' : ''}`}
             onClick={() => setActiveScreen('Profile')}
           >
-            <span className="bottom-nav-icon">◉</span>
+            <span className="bottom-nav-icon">P</span>
             <span>Profile</span>
           </button>
         </nav>

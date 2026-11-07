@@ -172,7 +172,6 @@ function AuthScreen() {
                 : isReset
                   ? 'Send reset link'
                   : 'Sign in'}
-            {!loading && <span>↗</span>}
           </button>
         </form>
 
@@ -186,7 +185,7 @@ function AuthScreen() {
                 setError('')
               }}
             >
-              ← Back to sign in
+              Back to sign in
             </button>
           ) : (
             <>
