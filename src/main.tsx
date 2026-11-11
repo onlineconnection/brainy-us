@@ -1,13 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.tsx'
-import AdminApp from './admin/AdminApp.tsx'
-
-const isAdminRoute = window.location.pathname.startsWith('/admin')
+import AdminApp from './admin/AdminApp'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {isAdminRoute ? <AdminApp /> : <App />}
+    <AdminApp />
   </StrictMode>,
 )

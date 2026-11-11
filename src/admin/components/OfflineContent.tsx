@@ -67,6 +67,10 @@ function OfflineContent() {
   const [publishedPack, setPublishedPack] = useState<PublishedPack | null>(null)
   const [loading, setLoading] = useState<'preview' | 'publish' | null>(null)
   const [requestError, setRequestError] = useState('')
+  const [packTitle, setPackTitle] = useState('')
+  const [packDescription, setPackDescription] = useState('')
+  const [packCategory, setPackCategory] = useState('General')
+  const [packDifficulty, setPackDifficulty] = useState<'easy' | 'medium' | 'hard' | 'mixed'>('mixed')
 
   function updateQuestion(id: number, update: Partial<QuestionDraft>) {
     setQuestions(current => current.map(question =>
@@ -171,6 +175,17 @@ function OfflineContent() {
       }
     }
 
+    if (action === 'publish') {
+      if (!packTitle.trim()) {
+        setRequestError('Enter a title for this practice pack.')
+        return
+      }
+      if (!packCategory.trim()) {
+        setRequestError('Enter a category for this practice pack.')
+        return
+      }
+    }
+
     setLoading(action)
     setRequestError('')
     setPublishedPack(null)
@@ -188,7 +203,13 @@ function OfflineContent() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({
+          text,
+          title: packTitle.trim(),
+          description: packDescription.trim(),
+          category: packCategory.trim(),
+          difficulty: packDifficulty,
+        }),
       })
 
       const data = await response.json()
@@ -236,6 +257,38 @@ function OfflineContent() {
             <strong>{mode === 'editor' ? questions.length : (bulkText.trim() ? bulkText.trim().split(/\n\s*\n/).length : 0)}</strong>
             <span>QUESTIONS</span>
           </div>
+        </div>
+
+        <div className="studio-metadata-grid">
+          <label>
+            <span className="studio-field-label">PACK TITLE</span>
+            <input className="studio-question-field" value={packTitle}
+              onChange={event => setPackTitle(event.target.value)}
+              placeholder="e.g. Liberia General Knowledge" maxLength={120} />
+          </label>
+          <label>
+            <span className="studio-field-label">CATEGORY</span>
+            <input className="studio-question-field" value={packCategory}
+              onChange={event => setPackCategory(event.target.value)}
+              placeholder="e.g. General Knowledge" maxLength={80} />
+          </label>
+          <label>
+            <span className="studio-field-label">DIFFICULTY</span>
+            <select className="studio-question-field" value={packDifficulty}
+              onChange={event => setPackDifficulty(event.target.value as typeof packDifficulty)}>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+              <option value="mixed">Mixed</option>
+            </select>
+          </label>
+          <label>
+            <span className="studio-field-label">DESCRIPTION (OPTIONAL)</span>
+            <textarea className="studio-question-field" value={packDescription}
+              onChange={event => setPackDescription(event.target.value)}
+              placeholder="What will players learn in this pack?"
+              rows={2} maxLength={500} />
+          </label>
         </div>
 
         <div className="studio-tabs">

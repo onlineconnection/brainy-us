@@ -18,3 +18,44 @@
 .battle-prize-position{position:absolute;right:13px;top:12px;background:#302650;color:#c5b5ff;border-radius:6px;padding:4px 8px;font-size:11px;font-weight:800}
 .battle-no-prize{padding:16px;background:#292932;border-radius:9px;color:#c9c9d0;font-size:13px}
 @media(max-width:650px){.battle-prize-list{grid-template-columns:1fr}.battle-question-title{align-items:flex-start;flex-direction:column}}
+
+
+/* Per-battle mobile money payment editor */
+.battle-payment-edit-button {
+  background: #302650;
+  color: #c8baff;
+  border: 1px solid #514276;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.battle-payment-editor {
+  margin-top: 18px;
+  padding: 18px;
+  background: #111116;
+  border: 1px solid #514276;
+  border-radius: 11px;
+}
+.battle-payment-editor h4 {
+  margin: 0 0 6px;
+  color: #fff;
+}
+.battle-payment-editor > p {
+  margin-bottom: 17px;
+  color: #999;
+  font-size: 12px;
+}
+.battle-payment-editor button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+@media(max-width:650px) {
+  .battle-payment-editor {
+    padding: 13px;
+  }
+  .battle-admin-card-bottom > div {
+    flex-wrap: wrap;
+  }
+}

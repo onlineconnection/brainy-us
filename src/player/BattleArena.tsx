@@ -10,7 +10,6 @@ interface Battle {
   entry_fee: number
   currency: string
   prize_pool: number
-  max_players: number
   question_count: number
   registration_opens_at: string | null
   registration_closes_at: string | null
@@ -52,7 +51,6 @@ function BattleArena() {
           entry_fee,
           currency,
           prize_pool,
-          max_players,
           question_count,
           registration_opens_at,
           registration_closes_at,
@@ -176,10 +174,6 @@ function BattleArena() {
                     {battle.currency} {Number(battle.prize_pool).toLocaleString()}
                   </strong>
                 </div>
-                <div>
-                  <span>PLAYER LIMIT</span>
-                  <strong>{battle.max_players}</strong>
-                </div>
               </div>
 
               <div className="battle-card-footer">
@@ -235,10 +229,6 @@ function BattleArena() {
                 <strong>
                   {selectedBattle.currency} {Number(selectedBattle.prize_pool).toLocaleString()}
                 </strong>
-              </div>
-              <div>
-                <span>Maximum players</span>
-                <strong>{selectedBattle.max_players}</strong>
               </div>
               <div>
                 <span>Questions</span>

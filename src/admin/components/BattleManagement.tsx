@@ -12,7 +12,6 @@ interface Battle {
   entry_fee: number
   currency: string
   prize_pool: number
-  max_players: number | null
   winner_count: number
   question_count: number
   duration_minutes: number
@@ -20,6 +19,10 @@ interface Battle {
   registration_opens_at: string | null
   registration_closes_at: string | null
   starts_at: string | null
+  payment_provider: string | null
+  payment_recipient_name: string | null
+  payment_recipient_number: string | null
+  payment_instructions: string | null
   created_at: string
 }
 
@@ -42,13 +45,16 @@ const initialForm = {
   entry_fee: '0',
   currency: 'USD',
   prize_pool: '0',
-  max_players: '50',
   winner_count: '1',
   duration_minutes: '15',
   seconds_per_question: '15',
   registration_opens_at: '',
   registration_closes_at: '',
   starts_at: '',
+  payment_provider: '',
+  payment_recipient_name: '',
+  payment_recipient_number: '',
+  payment_instructions: '',
 }
 
 function toIso(value: string) {
@@ -60,18 +66,26 @@ function formatDate(value: string | null) {
   return new Date(value).toLocaleString()
 }
 
-export default function BattleManagement() {
+export default function BattleManagement({ mode = 'management' }: { mode?: 'management' | 'creation' }) {
   const [battles, setBattles] = useState<Battle[]>([])
   const [form, setForm] = useState(initialForm)
   const [questionText, setQuestionText] = useState('')
   const [previewQuestions, setPreviewQuestions] = useState<PreviewQuestion[]>([])
   const [previewing, setPreviewing] = useState(false)
   const [prizes, setPrizes] = useState<string[]>([''])
-  const [showForm, setShowForm] = useState(false)
+  const [showForm, setShowForm] = useState(mode === 'creation')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [editingPayment, setEditingPayment] = useState<{
+    battleId: string
+    payment_provider: string
+    payment_recipient_name: string
+    payment_recipient_number: string
+    payment_instructions: string
+  } | null>(null)
+  const [paymentSaving, setPaymentSaving] = useState(false)
 
   async function loadBattles() {
     setLoading(true)
@@ -166,7 +180,6 @@ export default function BattleManagement() {
     setError('')
     setMessage('')
 
-    const maxPlayers = Number(form.max_players)
     const winners = Number(form.winner_count)
     const questionCount = previewQuestions.length
     const prizePool = Number(form.prize_pool)
@@ -179,24 +192,29 @@ export default function BattleManagement() {
       return
     }
 
-    if (!Number.isInteger(maxPlayers) || maxPlayers < 1) {
-      setError('Maximum players must be at least 1.')
+    if (!Number.isInteger(winners) || winners < 1) {
+      setError('Winner count must be at least 1.')
       return
     }
 
-    if (!Number.isInteger(winners) || winners < 1 || winners > maxPlayers) {
-      setError('Winner count must be between 1 and maximum players.')
-      return
-    }
-
-    if (questionCount < 1 || questionCount > 500) {
-      setError('Preview and validate between 1 and 500 questions before saving.')
+    if (questionCount < 1) {
+      setError('Preview and validate at least 1 question before saving.')
       return
     }
 
     if (!Number.isFinite(entryFee) || entryFee < 0 ||
         !Number.isFinite(prizePool) || prizePool < 0) {
       setError('Entry fee and prize pool cannot be negative.')
+      return
+    }
+
+    if (entryFee > 0 && (
+      !form.payment_provider.trim() ||
+      !form.payment_recipient_name.trim() ||
+      !form.payment_recipient_number.trim() ||
+      !form.payment_instructions.trim()
+    )) {
+      setError('Paid battles require complete mobile money payment details.')
       return
     }
 
@@ -255,13 +273,16 @@ export default function BattleManagement() {
         entry_fee: entryFee,
         currency: form.currency,
         prize_pool: prizePool,
-        max_players: maxPlayers,
         winner_count: winners,
         duration_minutes: duration,
         seconds_per_question: seconds,
         registration_opens_at: toIso(form.registration_opens_at),
         registration_closes_at: toIso(form.registration_closes_at),
         starts_at: toIso(form.starts_at),
+        payment_provider: form.payment_provider.trim(),
+        payment_recipient_name: form.payment_recipient_name.trim(),
+        payment_recipient_number: form.payment_recipient_number.trim(),
+        payment_instructions: form.payment_instructions.trim(),
       }
 
       const prizeRows = prizePool > 0
@@ -298,7 +319,7 @@ export default function BattleManagement() {
       setQuestionText('')
       setPreviewQuestions([])
       setPrizes([''])
-      setShowForm(false)
+      setShowForm(mode === 'creation')
       await loadBattles()
     } catch (err) {
       setError(`Battle creation failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
@@ -392,27 +413,100 @@ export default function BattleManagement() {
     await loadBattles()
   }
 
+  function openPaymentEditor(battle: Battle) {
+    setEditingPayment({
+      battleId: battle.id,
+      payment_provider: battle.payment_provider || '',
+      payment_recipient_name: battle.payment_recipient_name || '',
+      payment_recipient_number: battle.payment_recipient_number || '',
+      payment_instructions: battle.payment_instructions || '',
+    })
+    setError('')
+    setMessage('')
+  }
+
+  async function savePaymentDetails(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!editingPayment) return
+
+    setError('')
+    setMessage('')
+
+    if (
+      !editingPayment.payment_provider.trim() ||
+      !editingPayment.payment_recipient_name.trim() ||
+      !editingPayment.payment_recipient_number.trim() ||
+      !editingPayment.payment_instructions.trim()
+    ) {
+      setError('Please complete all mobile money payment fields.')
+      return
+    }
+
+    setPaymentSaving(true)
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session?.access_token) {
+        throw new Error('Your session has expired. Please sign in again.')
+      }
+
+      const response = await fetch(
+        `/api/admin/battles/${editingPayment.battleId}/payment`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            payment_provider: editingPayment.payment_provider.trim(),
+            payment_recipient_name: editingPayment.payment_recipient_name.trim(),
+            payment_recipient_number: editingPayment.payment_recipient_number.trim(),
+            payment_instructions: editingPayment.payment_instructions.trim(),
+          }),
+        }
+      )
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Could not update payment details.')
+      }
+
+      setEditingPayment(null)
+      await loadBattles()
+      setMessage(result.message || 'Battle payment details updated.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not update payment details.')
+    } finally {
+      setPaymentSaving(false)
+    }
+  }
+
   return (
     <section className="battle-management">
       <div className="battle-management-header">
         <div>
           <span className="battle-management-eyebrow">COMPETITION CONTROL</span>
-          <h1>Battle Management</h1>
-          <p>Create, configure and publish complete online battles.</p>
+          <h1>{mode === 'creation' ? 'Battle Creation' : 'Battle Management'}</h1>
+          <p>{mode === 'creation' ? 'Configure a competition, validate its questions and assign prizes.' : 'View, publish and manage your online competitions.'}</p>
         </div>
-        <button className="battle-create-button" onClick={() => {
-          setShowForm(!showForm)
-          setError('')
-          setMessage('')
-        }}>
-          {showForm ? 'Cancel' : '+ Create Battle'}
-        </button>
+        {mode === 'management' && (
+          <button className="battle-create-button" onClick={() => {
+            setShowForm(!showForm)
+            setError('')
+            setMessage('')
+          }}>
+            {showForm ? 'Cancel' : '+ Create Battle'}
+          </button>
+        )}
       </div>
 
       {message && <div className="battle-notice success">{message}</div>}
       {error && <div className="battle-notice error">{error}</div>}
 
-      {showForm && (
+      {(mode === 'creation' || showForm) && (
         <form className="battle-create-form" onSubmit={createBattle}>
           <div className="battle-form-heading">
             <h2>Create a complete battle</h2>
@@ -454,20 +548,15 @@ export default function BattleManagement() {
             </label>
 
             <label className="battle-field">
-              Maximum players
-              <input type="number" min="1" required value={form.max_players} onChange={e => updateField('max_players', e.target.value)} />
-            </label>
-
-            <label className="battle-field">
               Number of winners
-              <input type="number" min="1" max={form.max_players} required value={form.winner_count} onChange={e => updateField('winner_count', e.target.value)} />
+              <input type="number" min="1" required value={form.winner_count} onChange={e => updateField('winner_count', e.target.value)} />
               <small>How many positions receive prizes?</small>
             </label>
 
             <label className="battle-field">
               Validated questions
               <input type="text" readOnly value={`${previewQuestions.length} questions validated`} />
-              <small>Import up to 500 questions in the Battle questions section below.</small>
+              <small>Import as many questions as needed in the Battle questions section below.</small>
             </label>
 
             <label className="battle-field">
@@ -513,9 +602,62 @@ export default function BattleManagement() {
             </label>
           </div>
 
+          {Number(form.entry_fee) > 0 && (
+            <section className="battle-payment-settings">
+              <h3>Mobile money payment details</h3>
+              <p>Players will use these details to pay externally. They will not submit payment receipts in the app.</p>
+
+              <div className="battle-form-grid">
+                <label className="battle-field">
+                  Payment provider *
+                  <select
+                    required
+                    value={form.payment_provider}
+                    onChange={e => updateField('payment_provider', e.target.value)}
+                  >
+                    <option value="">Select provider</option>
+                    <option value="Orange Money">Orange Money</option>
+                    <option value="Lonestar MTN Mobile Money">Lonestar MTN Mobile Money</option>
+                  </select>
+                </label>
+
+                <label className="battle-field">
+                  Recipient/account name *
+                  <input
+                    required
+                    value={form.payment_recipient_name}
+                    onChange={e => updateField('payment_recipient_name', e.target.value)}
+                    placeholder="Name registered to the account"
+                  />
+                </label>
+
+                <label className="battle-field">
+                  Recipient phone number *
+                  <input
+                    required
+                    value={form.payment_recipient_number}
+                    onChange={e => updateField('payment_recipient_number', e.target.value)}
+                    placeholder="Mobile money number"
+                  />
+                </label>
+
+                <label className="battle-field full">
+                  Payment instructions *
+                  <textarea
+                    required
+                    rows={3}
+                    value={form.payment_instructions}
+                    onChange={e => updateField('payment_instructions', e.target.value)}
+                    placeholder="Explain how players should pay and include the Player ID and Battle ID as the payment reference where supported."
+                  />
+                </label>
+              </div>
+            </section>
+          )}
+
           <div className="battle-step-heading">
             <span>02</span>
-            <div><h3>Battle questions</h3><p>Upload one TXT file containing up to 500 questions for this battle</p></div>
+            <div><h3>Battle questions</h3><p>Upload one TXT file containing your battle questions</p></div>
           </div>
 
           <div className="battle-question-list">
@@ -534,7 +676,7 @@ export default function BattleManagement() {
                   setMessage(`${file.name} loaded. Preview the questions before saving.`)
                 }}
               />
-              <small>Maximum 500 questions. Each question must have exactly six lines, separated by a blank line.</small>
+              <small>No fixed question limit. Each question must have exactly six lines, separated by a blank line.</small>
             </label>
 
             <label className="battle-field">
@@ -560,7 +702,7 @@ export default function BattleManagement() {
               >
                 {previewing ? 'Checking questions...' : 'Preview and Validate Questions'}
               </button>
-              <span>{previewQuestions.length} / 500 questions validated</span>
+              <span>{previewQuestions.length} questions validated</span>
             </div>
 
             {previewQuestions.length > 0 && (
@@ -623,6 +765,8 @@ export default function BattleManagement() {
         </form>
       )}
 
+      {mode === 'management' && (
+      <>
       <div className="battle-list-heading">
         <div><h2>All battles</h2><p>{battles.length} battle{battles.length === 1 ? '' : 's'} created</p></div>
         <button className="battle-refresh-button" onClick={() => void loadBattles()}>↻ Refresh</button>
@@ -646,7 +790,6 @@ export default function BattleManagement() {
               </div>
 
               <div className="battle-admin-stats">
-                <div><strong>{battle.max_players ?? 'Unlimited'}</strong><span>Max players</span></div>
                 <div><strong>{battle.winner_count}</strong><span>Winners</span></div>
                 <div><strong>{battle.question_count}</strong><span>Questions</span></div>
                 <div><strong>{battle.duration_minutes} min</strong><span>Duration</span></div>
@@ -657,6 +800,15 @@ export default function BattleManagement() {
               <div className="battle-admin-card-bottom">
                 <span>Starts: {formatDate(battle.starts_at)}</span>
                 <div>
+                  {battle.entry_fee > 0 && (
+                    <button
+                      type="button"
+                      className="battle-payment-edit-button"
+                      onClick={() => openPaymentEditor(battle)}
+                    >
+                      Edit Payment Details
+                    </button>
+                  )}
                   {battle.status !== 'published' && (
                     <button className="battle-publish-button" onClick={() => void publishBattle(battle)}>
                       Publish Battle
@@ -665,9 +817,89 @@ export default function BattleManagement() {
                   <button className="battle-delete-button" onClick={() => void deleteBattle(battle.id)}>Delete</button>
                 </div>
               </div>
+
+              {editingPayment?.battleId === battle.id && (
+                <form className="battle-payment-editor" onSubmit={savePaymentDetails}>
+                  <h4>Edit Mobile Money Payment Details</h4>
+                  <p>Changes apply only to this battle.</p>
+
+                  <div className="battle-form-grid">
+                    <label className="battle-field">
+                      Mobile money provider *
+                      <select
+                        required
+                        value={editingPayment.payment_provider}
+                        onChange={e => setEditingPayment(current =>
+                          current ? { ...current, payment_provider: e.target.value } : current
+                        )}
+                      >
+                        <option value="">Select provider</option>
+                        <option value="Orange Money">Orange Money</option>
+                        <option value="Lonestar MTN Mobile Money">Lonestar MTN Mobile Money</option>
+                      </select>
+                    </label>
+
+                    <label className="battle-field">
+                      Recipient/account name *
+                      <input
+                        required
+                        value={editingPayment.payment_recipient_name}
+                        onChange={e => setEditingPayment(current =>
+                          current ? { ...current, payment_recipient_name: e.target.value } : current
+                        )}
+                      />
+                    </label>
+
+                    <label className="battle-field">
+                      Recipient phone number *
+                      <input
+                        required
+                        type="tel"
+                        value={editingPayment.payment_recipient_number}
+                        onChange={e => setEditingPayment(current =>
+                          current ? { ...current, payment_recipient_number: e.target.value } : current
+                        )}
+                      />
+                    </label>
+
+                    <label className="battle-field full">
+                      Payment instructions *
+                      <textarea
+                        required
+                        rows={3}
+                        value={editingPayment.payment_instructions}
+                        onChange={e => setEditingPayment(current =>
+                          current ? { ...current, payment_instructions: e.target.value } : current
+                        )}
+                      />
+                      <small>Include the Player ID and Battle ID as the payment reference where supported.</small>
+                    </label>
+                  </div>
+
+                  <div className="battle-form-actions">
+                    <button
+                      type="button"
+                      className="battle-cancel-button"
+                      disabled={paymentSaving}
+                      onClick={() => setEditingPayment(null)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="battle-create-button"
+                      disabled={paymentSaving}
+                    >
+                      {paymentSaving ? 'Saving...' : 'Save Payment Details'}
+                    </button>
+                  </div>
+                </form>
+              )}
             </article>
           ))}
         </div>
+      )}
+      </>
       )}
     </section>
   )
