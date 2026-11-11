@@ -334,7 +334,6 @@ function AdminApp() {
       }
 
       if (active) {
-        setAuthStatus('checking')
         setAuthError('')
       }
 
