@@ -37,7 +37,7 @@ function normalizeQuestion(value: string) {
   return value.trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
-export function parseQuestionText(input: string): ParseResult {
+export function parseQuestionText(input: string, maxQuestions = 500): ParseResult {
   const questions: ParsedQuestion[] = []
   const errors: ImportError[] = []
   const seenQuestions = new Set<string>()
@@ -71,10 +71,10 @@ export function parseQuestionText(input: string): ParseResult {
     errors.push({ line: 1, message: 'The TXT file contains no questions.' })
   }
 
-  if (blocks.length > 500) {
+  if (blocks.length > maxQuestions) {
     errors.push({
       line: 1,
-      message: `Maximum 500 questions allowed per battle. Found ${blocks.length}.`,
+      message: `Maximum ${maxQuestions} questions allowed. Found ${blocks.length}.`,
     })
 
     return {
