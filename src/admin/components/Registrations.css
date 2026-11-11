@@ -1,0 +1,291 @@
+.registrations-page {
+  color: #f5f5f7;
+}
+
+.registrations-header,
+.registrations-list-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.registrations-eyebrow {
+  color: #b8aaff;
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+.registrations-header h1 {
+  font-size: 28px;
+  margin: 7px 0;
+}
+
+.registrations-header p,
+.registrations-list-heading p {
+  color: #999;
+  margin: 5px 0;
+}
+
+.registrations-refresh,
+.registrations-list-heading select {
+  background: #292932;
+  color: #eee;
+  border: 1px solid #41414b;
+  border-radius: 8px;
+  padding: 11px 15px;
+  cursor: pointer;
+}
+
+.registrations-refresh:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.registrations-notice {
+  padding: 13px 16px;
+  border-radius: 9px;
+  margin-bottom: 18px;
+}
+
+.registrations-notice.success {
+  background: #163c2c;
+  color: #9af0bf;
+}
+
+.registrations-notice.error {
+  background: #421f28;
+  color: #ffb2bd;
+}
+
+.registrations-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 30px;
+}
+
+.registrations-summary article {
+  background: #17171d;
+  border: 1px solid #303039;
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.registrations-summary span {
+  color: #999;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.registrations-summary strong {
+  color: #fff;
+  font-size: 25px;
+}
+
+.registrations-list-heading {
+  margin-top: 25px;
+}
+
+.registrations-list-heading h2 {
+  margin: 0 0 6px;
+  font-size: 19px;
+}
+
+.registrations-list-heading p {
+  font-size: 13px;
+}
+
+.registrations-list {
+  display: grid;
+  gap: 15px;
+}
+
+.registrations-empty {
+  text-align: center;
+  padding: 45px 15px;
+  background: #17171d;
+  border: 1px solid #303039;
+  border-radius: 12px;
+  color: #999;
+}
+
+.registrations-empty h3 {
+  color: #fff;
+}
+
+.registration-card {
+  background: #17171d;
+  border: 1px solid #303039;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.registration-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.registration-battle-id {
+  display: inline-block;
+  background: #29233d;
+  color: #c8baff;
+  border: 1px solid #40365e;
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .5px;
+}
+
+.registration-card-top h3 {
+  margin: 10px 0 5px;
+  color: #fff;
+  font-size: 17px;
+}
+
+.registration-status {
+  display: inline-block;
+  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 6px 9px;
+  border-radius: 5px;
+}
+
+.registration-status.pending {
+  background: #38332a;
+  color: #f2ca82;
+}
+
+.registration-status.approved {
+  background: #173b2c;
+  color: #8be6b2;
+}
+
+.registration-status.rejected {
+  background: #421f28;
+  color: #ffb2bd;
+}
+
+.registration-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 17px;
+  margin: 20px 0;
+  padding: 18px 0;
+  border-top: 1px solid #303039;
+  border-bottom: 1px solid #303039;
+}
+
+.registration-details div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.registration-details span {
+  color: #999;
+  font-size: 10px;
+  letter-spacing: .8px;
+}
+
+.registration-details strong {
+  color: #eee;
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.registration-payment.pending {
+  color: #f2ca82;
+}
+
+.registration-payment.verified {
+  color: #8be6b2;
+}
+
+.registration-payment.rejected {
+  color: #ffb2bd;
+}
+
+.registration-payment.not_required {
+  color: #b8aaff;
+}
+
+.registration-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.registration-actions button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.registration-actions button:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+.registration-approve,
+.registration-verify {
+  background: #245b40;
+  color: #a3f0c2;
+}
+
+.registration-reject,
+.registration-reject-payment {
+  background: #48232c;
+  color: #ffb2bd;
+}
+
+.registration-verify {
+  background: #302650;
+  color: #c8baff;
+}
+
+.registration-reviewed {
+  color: #8be6b2;
+  font-size: 12px;
+}
+
+@media (max-width: 850px) {
+  .registrations-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .registrations-header,
+  .registrations-list-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .registration-card-top {
+    flex-direction: column;
+  }
+
+  .registration-details {
+    grid-template-columns: 1fr;
+  }
+
+  .registrations-summary article {
+    padding: 14px;
+  }
+}

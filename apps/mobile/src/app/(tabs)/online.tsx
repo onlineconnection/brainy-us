@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../../providers/AuthProvider';
 import { ChevronLeft, Wifi, Swords } from 'lucide-react-native';
 
 const C = {
@@ -14,6 +15,7 @@ const C = {
 
 export default function OnlineRoute() {
   const router = useRouter();
+  const { presenceStatus, onlinePlayers } = useAuth();
 
   return (
     <View style={styles.container}>
@@ -41,8 +43,21 @@ export default function OnlineRoute() {
 
         <View style={styles.panelDivider} />
 
-        <Text style={styles.previewLabel}>STATUS</Text>
-        <Text style={styles.previewValue}>Gameplay development in progress</Text>
+        <Text style={styles.previewLabel}>CONNECTION STATUS</Text>
+        <Text style={styles.previewValue}>
+          {presenceStatus === 'authenticated'
+            ? 'Connected to Brainy US'
+            : presenceStatus === 'connecting'
+              ? 'Connecting to server...'
+              : presenceStatus === 'connected'
+                ? 'Authenticating player...'
+                : 'Offline'}
+        </Text>
+
+        <View style={styles.panelDivider} />
+
+        <Text style={styles.previewLabel}>ONLINE PLAYERS</Text>
+        <Text style={styles.previewValue}>{onlinePlayers}</Text>
       </View>
 
       <View style={styles.comingSoon}>

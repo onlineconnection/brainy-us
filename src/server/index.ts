@@ -127,7 +127,7 @@ app.post('/api/admin/battles/questions/preview', requireAdmin, (req, res) => {
     return res.status(400).json({ error: 'Question text is required.' })
   }
 
-  const parsed = parseQuestionText(text, Number.POSITIVE_INFINITY)
+  const parsed = parseQuestionText(text, Number.POSITIVE_INFINITY, true)
 
   if (!parsed.success) {
     return res.status(422).json({
@@ -176,7 +176,7 @@ app.post('/api/admin/battles', requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'Previewed questions and prize allocations are required.' })
     }
 
-    const parsed = parseQuestionText(text, Number.POSITIVE_INFINITY)
+    const parsed = parseQuestionText(text, Number.POSITIVE_INFINITY, true)
 
     if (!parsed.success) {
       return res.status(422).json({

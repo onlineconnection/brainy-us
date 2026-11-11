@@ -102,7 +102,10 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="online"
           options={{
-            href: null,
+            title: 'ONLINE',
+            tabBarIcon: ({ color, size }) => (
+              <Swords color={color} size={size} />
+            ),
           }}
         />
       </Tabs>

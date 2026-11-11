@@ -7,10 +7,19 @@ import React, {
 } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { connectPresence } from '../lib/presence';
+
+export type PresenceStatus =
+  | 'connecting'
+  | 'connected'
+  | 'authenticated'
+  | 'disconnected';
 
 type AuthContextValue = {
   session: Session | null;
   loading: boolean;
+  presenceStatus: PresenceStatus;
+  onlinePlayers: number;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -18,6 +27,9 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [presenceStatus, setPresenceStatus] =
+    useState<PresenceStatus>('disconnected');
+  const [onlinePlayers, setOnlinePlayers] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -48,8 +60,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    const accessToken = session?.access_token;
+
+    if (!accessToken) {
+      setPresenceStatus('disconnected');
+      setOnlinePlayers(0);
+      return;
+    }
+
+    try {
+      const disconnect = connectPresence(accessToken, {
+        onStatusChange: setPresenceStatus,
+        onOnlinePlayers: setOnlinePlayers,
+      });
+
+      return disconnect;
+    } catch (error) {
+      console.error('Presence initialization failed:', error);
+      setPresenceStatus('disconnected');
+      return;
+    }
+  }, [session?.access_token]);
+
   return (
-    <AuthContext.Provider value={{ session, loading }}>
+    <AuthContext.Provider
+      value={{
+        session,
+        loading,
+        presenceStatus,
+        onlinePlayers,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

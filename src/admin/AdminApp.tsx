@@ -22,6 +22,7 @@ import './Admin.css'
 import OfflineContent from './components/OfflineContent'
 import BattleManagement from './components/BattleManagement'
 import BattleCreation from './components/BattleCreation'
+import Registrations from './components/Registrations'
 import { supabase } from '../lib/supabase'
 
 const navigation = [
@@ -146,9 +147,6 @@ function AdminDashboard({
                 >
                   <span className="admin-nav-icon"><item.icon size={17} strokeWidth={1.9} /></span>
                   {item.name}
-                  {item.name === 'Registrations' && (
-                    <span className="nav-count">0</span>
-                  )}
                 </button>
               ))}
             </div>
@@ -192,6 +190,8 @@ function AdminDashboard({
             <BattleCreation />
           ) : activePage === 'Battles' ? (
             <BattleManagement />
+          ) : activePage === 'Registrations' ? (
+            <Registrations />
           ) : activePage === 'Offline Publishing' ? (
             <OfflineContent />
           ) : activePage === 'Overview' ? (

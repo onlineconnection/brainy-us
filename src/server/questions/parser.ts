@@ -37,7 +37,7 @@ function normalizeQuestion(value: string) {
   return value.trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
-export function parseQuestionText(input: string, maxQuestions = 500): ParseResult {
+export function parseQuestionText(input: string, maxQuestions = 500, skipDuplicates = false): ParseResult {
   const questions: ParsedQuestion[] = []
   const errors: ImportError[] = []
   const seenQuestions = new Set<string>()
@@ -156,6 +156,11 @@ export function parseQuestionText(input: string, maxQuestions = 500): ParseResul
     const duplicateKey = normalizeQuestion(questionText)
 
     if (seenQuestions.has(duplicateKey)) {
+      if (skipDuplicates) {
+        seenNumbers.add(sourceNumber)
+        continue
+      }
+
       errors.push({
         line: startLine,
         message: `Duplicate question detected: "${questionText}"`,
